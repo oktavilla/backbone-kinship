@@ -4,7 +4,7 @@ A simple, lightweight, Backbone model adding 1-1 and 1-N relations. No shared in
 
 Also, events are propagated from their relationships as `eventName:relationshipName’.
 
-## Create a model with relations
+## Creating a model with relations
 
 ``` javascript
 var Fruits = Backbone.Collection.extend({});
@@ -33,6 +33,8 @@ var myRelationalModelInstance = new MyRelationalModel({
   }
 });
 ```
+
+## Accessing data on a related model or collection
 
 You can then access the related models and collections by `get`ting them like so:
 ``` javascript
