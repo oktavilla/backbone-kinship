@@ -10,8 +10,8 @@ var Robot = Backbone.Model.extend({});
 
 var MyRelationalModel = Backbone.RelationalModel.extend({
   relations: {
-   myFirstRelation: Fruits,
-   myOtherRelation: Robot
+    myFirstRelation: Fruits,
+    myOtherRelation: Robot
   }
 });
 
