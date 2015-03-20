@@ -1,0 +1,25 @@
+{
+  license: "MIT",
+  version: "0.9.0",
+  name: "backbone-kinship",
+  main: "backbone-kinship.js",
+  description: "A simple model for 1-N and 1-1 relations",
+  homepage: "https://github.com/Oktavilla/backbone-kinship",
+  keywords: [
+    "backbone",
+    "relation",
+    "nested",
+    "model",
+    "collection"
+  ],
+  repository: {
+    type: "git",
+    url: "https://github.com/Oktavilla/backbone-kinship"
+  },
+  author: "Oktavilla <https://github.com/Oktavilla>",
+  contributors: "Listed at <https://github.com/Oktavilla/backbone-kinship/contributors>",
+  dependencies: {
+    underscore: ">=1.5.0",
+    backbone: ">=1.1.2"
+  }
+}
