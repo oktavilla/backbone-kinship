@@ -1,4 +1,4 @@
-# backbone-kinship
+# Backbone-kinship
 
 A simple model for 1-1 and 1-N relations. No shared instances, clever data pooling or reversed relations. It's really just a way to expand nested data into models and collections.
 
@@ -60,3 +60,6 @@ myRelationalModelInstance.get("myFirstRelation").add({
 });
 >> "add:myFirstRelation"
 ```
+----
+Backbone-kinship is released under the MIT license.
+Contributors: https://github.com/Oktavilla/backbone-kinship/contributors
