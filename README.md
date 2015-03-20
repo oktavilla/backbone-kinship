@@ -1,4 +1,4 @@
-# backbone-kinship
+# Backbone-kinship
 
 A simple model for 1-N and 1-1 relations.
 
@@ -46,3 +46,7 @@ console.log(myRelationalModelInstance.get("myOtherRelation").get("name"));
 console.log(myRelationalModelInstance.myOtherRelation.get("name"));
 >> "Bender Rodriguez"
 ```
+
+----
+Backbone-kinship is released under the MIT license.
+Contributors: https://github.com/Oktavilla/backbone-kinship/contributors
