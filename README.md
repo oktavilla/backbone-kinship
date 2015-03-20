@@ -23,7 +23,7 @@ var myRelationalModelInstance = new MyRelationalModel({
     },
     {
       "type": "apple",
-      "eatenBy": "horse
+      "eatenBy": "horse"
     }
   ],
   "myOtherRelation": {
