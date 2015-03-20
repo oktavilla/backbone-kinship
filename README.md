@@ -36,7 +36,7 @@ var myRelationalModelInstance = new MyRelationalModel({
 
 ## Accessing data on a related model or collection
 
-You can then access the related models and collections by `get`ting them like so:
+After instantiating a `Backbone.RelationalModel` you can access the related models and collections by `get`ting them like so:
 ``` javascript
 console.log(myRelationalModelInstance.get("myFirstRelation").at(0).get("type"));
 >> "banana"
