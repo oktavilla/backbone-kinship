@@ -9,9 +9,21 @@
 * model (Model.my-first-relation) and by using Model.get (Model.get("my-first-relation")).
 * Note that relations are undefined until they have been assigned a value.
 */
-define(["backbone", "underscore"], function(Backbone, _) {
+(function(root, factory) {
   "use strict";
-
+	// First AMD.
+	if (typeof define === "function" && define.amd) {
+		define(["exports", "backbone", "underscore"], factory);
+	}
+	// Next for Node.js or CommonJS.
+	else if (typeof exports !== "undefined") {
+		factory(exports, require("backbone"), require("underscore"));
+	}
+	// And as a browser global. Using `root` as it references `window`.
+	else {
+		factory(root, root.Backbone, root._);
+	}
+} (this, function(exports, Backbone, _) {
   Backbone.RelationalModel = Backbone.Model.extend({
     relations: {},
 
@@ -86,4 +98,4 @@ define(["backbone", "underscore"], function(Backbone, _) {
       to.trigger.apply(to, args);
     });
   };
-});
+}));
