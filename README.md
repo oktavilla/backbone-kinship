@@ -2,7 +2,7 @@
 
 A simple, lightweight, Backbone model adding 1-1 and 1-N relations. No shared instances, data pooling or reversed relations. It's really just a way to expand nested data into models and collections.
 
-Also, events are propagated from their relationships as `eventName:relationshipName’.
+Also, events are propagated from their relationships as `eventName:relationshipName`.
 
 ## Creating a model with relations
 
