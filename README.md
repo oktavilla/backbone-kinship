@@ -51,10 +51,9 @@ console.log(myRelationalModelInstance.myOtherRelation.get("name"));
 
 ## Events
 
-Events are propagated from their relationships as `eventName:relationshipName`. Triggering an `add` event on myFirstRelation will also trigger an event on myRelationalModelInstance:
-
+Events are propagated from their relationships as `eventName:relationshipName`. The following events also triggers a change event: "add", "remove", "change", "reset". Like so:
 ``` javascript
-myRelationalModelInstance.on("add", function(e) {
+myRelationalModelInstance.on("all", function(e) {
   console.log(e);
 });
 
@@ -63,6 +62,7 @@ myRelationalModelInstance.get("myFirstRelation").add({
   eatenBy: "panda"
 });
 
+>> "change"
 >> "add:myFirstRelation"
 ```
 ----
