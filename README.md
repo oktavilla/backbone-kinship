@@ -49,6 +49,8 @@ console.log(myRelationalModelInstance.myOtherRelation.get("name"));
 >> "Bender Rodriguez"
 ```
 
+## Events
+
 Triggering an `add` event on myFirstRelation will also trigger an event on myRelationalModelInstance:
 ``` javascript
 myRelationalModelInstance.on("add", function(e) {
