@@ -57,10 +57,12 @@ Events are propagated from their relationships as `eventName:relationshipName`. 
 myRelationalModelInstance.on("add", function(e) {
   console.log(e);
 });
+
 myRelationalModelInstance.get("myFirstRelation").add({
   type: "bamboo",
   eatenBy: "panda"
 });
+
 >> "add:myFirstRelation"
 ```
 ----
