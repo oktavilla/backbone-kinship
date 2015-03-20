@@ -85,17 +85,32 @@
   });
 
   /*
+  * These events should also trigger a "change" event.
+  */
+  var CHANGE_EVENTS = {
+    add: true,
+    remove: true,
+    change: true,
+    reset: true
+  };
+  
+  /*
   * Delegates all events from one entity to another, on the format
-  * eventName:fromName
+  * eventName:fromName. A "change" event will also be triggered for "add", "remove",
+  * "change" and "reset" events.
   * @param from The entity that emits the event
   * @param to The entity that should receive the event
   * @param fromName Display name to use to show where this event originated
   */
   function delegateEvents(from, to, fromName) {
     from.bind("all", function() {
-      var args = _.toArray(arguments);
+      var args = _.toArray(arguments); // Cloning
       args[0] = args[0] + ":" + fromName;
       to.trigger.apply(to, args);
+      if (CHANGE_EVENTS[args[0]]) {
+        args[0] = "change";
+        to.trigger.apply(to, args);
+      }
     });
   };
 }));
