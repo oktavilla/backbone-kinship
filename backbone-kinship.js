@@ -43,6 +43,7 @@
       }
       // Check if any relations are among the attributes
       _.each(this.relations, function(constructor, name) {
+        var setMethod;
         if (typeof attributes[name] !== "undefined") {
           // Make sure that this relation is set up
           if (!this[name]) {
@@ -52,7 +53,13 @@
             delegateEvents(this[name], this, name);
           }
           // Setting data on the relational object using either model.set() or collection.reset()
-          this[name][(this[name] instanceof Backbone.Collection) ? "reset" : "set"](attributes[name], attributes[name].value, options);
+          setMethod = this[name] instanceof Backbone.Collection ? "reset" : "set";
+          // Handling both key-value and attribute signatures
+          if (_.isObject(attributes[name])) {
+            this[name][setMethod](attributes[name], options);
+          } else {
+            this[name][setMethod](attributes[name], attributes[name].value, options);
+          }
           // Removing relational data so it isn't also set on the model
           if (key[name]) {
              // Cloning to avoid affecting other users of this object (but we don't want to clone it more than once because performace)
