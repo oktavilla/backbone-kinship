@@ -11,7 +11,7 @@
 */
 (function(root, factory) {
   "use strict";
-	// First AMD.
+	// First AMD
 	if (typeof define === "function" && define.amd) {
 		define(["exports", "backbone", "underscore"], factory);
 	}
@@ -32,8 +32,7 @@
     },
 
     set: function(key, value, options) {
-      var attributes,
-          isCloned;
+      var attributes, isCloned;
       // Handling the two function signatures, either key-value or attribute object
       if (_.isObject(key)) {
         attributes = key;
@@ -112,9 +111,10 @@
   function delegateEvents(from, to, fromName) {
     from.bind("all", function() {
       var args = _.toArray(arguments); // Cloning
-      args[0] = args[0] + ":" + fromName;
+      var eventName = args[0];
+      args[0] = eventName + ":" + fromName;
       to.trigger.apply(to, args);
-      if (CHANGE_EVENTS[args[0]]) {
+      if (CHANGE_EVENTS[eventName]) {
         args[0] = "change";
         to.trigger.apply(to, args);
       }
