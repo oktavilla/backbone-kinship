@@ -26,6 +26,10 @@
 } (this, function(exports, Backbone, _) {
   Backbone.RelationalModel = Backbone.Model.extend({
     relations: {},
+    
+    clone: function() {
+      return new this.constructor(this.toJSON());
+    },
 
     get: function(key) {
       return this.relations[key] ? this[key] : Backbone.Model.prototype.get.call(this, key);
