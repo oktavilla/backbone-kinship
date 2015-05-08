@@ -44,17 +44,22 @@
       } else {
         (attributes = {})[key] = value;
       }
-      // Check if any relations are among the attributes
+      // Checking if any relations are among the attributes
       _.each(this.relations, function(constructor, name) {
-        var setMethod;
-        if (typeof attributes[name] !== "undefined") {
-          // Make sure that this relation is set up
-          if (!this[name]) {
-            // Setting up new relation
-            this[name] = new constructor();
+        var entity, setMethod;
+        // Making sure that this relation is set up
+        if (!this[name]) {
+          // Setting up new relation
+          entity = new constructor();
+          // Only collections can be set up without data
+          if (typeof attributes[name] !== "undefined" || entity instanceof Backbone.Collection) {
+            this[name] = entity;
             // Setting up dispatcher for relational events, for example that "add" on a relation called "collection" would trigger the event "collection:add" on this model
             delegateEvents(this[name], this, name);
           }
+        }
+        // Checking if there is data for this relation
+        if (typeof attributes[name] !== "undefined") {
           // Setting data on the relational object using either model.set() or collection.reset()
           setMethod = this[name] instanceof Backbone.Collection ? "reset" : "set";
           // Handling both key-value and attribute signatures
