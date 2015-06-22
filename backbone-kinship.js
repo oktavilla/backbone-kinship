@@ -1,4 +1,4 @@
-/*
+/**
 * A simple model for 1-N and 1-1 relations.
 * Relations are set up like
 * relations: {
@@ -26,10 +26,6 @@
 } (this, function(exports, Backbone, _) {
   Backbone.RelationalModel = Backbone.Model.extend({
     relations: {},
-    
-    clone: function() {
-      return new this.constructor(this.toJSON());
-    },
 
     get: function(key) {
       return this.relations[key] ? this[key] : Backbone.Model.prototype.get.call(this, key);
@@ -43,6 +39,22 @@
         options = value;
       } else {
         (attributes = {})[key] = value;
+      }
+      // Initializing relational functionality (if it's not already done)
+      if (!this._attributes) {
+        // Setting up internal getter and setter for attributes to keep it clean
+        // from the actual releated models and collections
+        this._attributes = _.clone(this.attributes);
+        Object.defineProperty(this, "attributes", {
+          configurable: true,
+          enumerable: true,
+          get: function() {
+            return getAttributes(this);
+          },
+          set: function(value) {
+            return setAttributes(this, value);
+          }
+        });
       }
       // Checking if any relations are among the attributes
       _.each(this.relations, function(constructor, name) {
@@ -85,21 +97,10 @@
         Backbone.Model.prototype.set.call(this, key, value, options);
       }
       return this;
-    },
-
-    toJSON: function(options) {
-      var json = Backbone.Model.prototype.toJSON.call(this, options);
-      // Adding expanded json data from all relations
-      _.each(this.relations, function(constructor, name) {
-        if (this[name]) {
-          json[name] = this[name].toJSON();
-        }
-      }, this);
-      return json;
     }
   });
 
-  /*
+  /**
   * These events should also trigger a "change" event.
   */
   var CHANGE_EVENTS = {
@@ -108,6 +109,32 @@
     change: true,
     reset: true
   };
+
+  /**
+  * Returns all attributes for a model
+  * Relational attributes will be JSONified
+  * @param model A Backbone-kinship Model
+  * @return Model attributes
+  */
+  function getAttributes(model) {
+    var attributes = model._attributes;
+    // Adding expanded json data from all relations
+    _.each(model.relations, function(constructor, name) {
+      if (model[name]) {
+        attributes[name] = model[name].toJSON();
+      }
+    });
+    return attributes;
+  }
+  
+  /**
+  * Sets attributes for a model
+  * @param model A Backbone-kinship Model
+  * @param value The value to set
+  */
+  function setAttributes(model, value) {
+    model._attributes = value;
+  }
   
   /*
   * Delegates all events from one entity to another, on the format
@@ -128,5 +155,5 @@
         to.trigger.apply(to, args);
       }
     });
-  };
+  }
 }));
