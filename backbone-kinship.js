@@ -58,7 +58,8 @@
       }
       // Checking if any relations are among the attributes
       _.each(this.relations, function(constructor, name) {
-        var entity, setMethod;
+        var entity;
+        var setMethod = "set";
         // Making sure that this relation is set up
         if (!this[name]) {
           // Setting up new relation
@@ -69,11 +70,17 @@
             // Setting up dispatcher for relational events, for example that "add" on a relation called "collection" would trigger the event "collection:add" on this model
             delegateEvents(this[name], this, name);
           }
+          // Initial sets are always resets (if possible and unless required otherwise)
+          if ((!options || typeof options.reset === "undefined") && entity.reset) {
+            setMethod = "reset";
+          }
         }
         // Checking if there is data for this relation
         if (typeof attributes[name] !== "undefined") {
-          // Setting data on the relational object using either model.set() or collection.reset()
-          setMethod = this[name] instanceof Backbone.Collection ? "reset" : "set";
+          // Switching to reset if required (and possible)
+          if (options && options.reset && this[name].reset) {
+            setMethod = "reset";
+          }
           // Handling both key-value and attribute signatures
           if (_.isObject(attributes[name])) {
             this[name][setMethod](attributes[name], options);
