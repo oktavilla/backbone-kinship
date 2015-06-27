@@ -111,7 +111,7 @@
   * @param fromName Display name to use for showing where this event originated
   */
   function delegateEvents(from, to, fromName) {
-    from.bind("all", function() {
+    from.bind("all", function () {
       var args = _.toArray(arguments); // Cloning
       var eventName = args[0];
       args[0] = eventName + ":" + fromName;
