@@ -1,6 +1,6 @@
 # Backbone-kinship
 
-A simple, lightweight, Backbone model adding 1-1 and 1-N relations. No shared instances, data pooling or reversed relations. It's really just a way to expand nested data into models and collections.
+A simple, lightweight, Backbone model adding 1-1 and 1-N relations. No shared instances, data pooling or reversed relations. It's really just an easy way to expand nested data into models and collections.
 
 ## Creating a model with relations
 
@@ -51,7 +51,7 @@ console.log(myRelationalModelInstance.myOtherRelation.get("name"));
 
 ## Events
 
-Events are propagated from their relationships as `eventName:relationshipName`. The following events also triggers a change event: "add", "remove", "change", "reset". Like so:
+Events are propagated from their relationships as `eventName:relationshipName`, like so:
 ``` javascript
 myRelationalModelInstance.on("all", function(e) {
   console.log(e);
@@ -62,8 +62,9 @@ myRelationalModelInstance.get("myFirstRelation").add({
   eatenBy: "panda"
 });
 
->> "change"
 >> "add:myFirstRelation"
+>> "change:myFirstRelation"
+>> "change"
 ```
 ----
 Backbone-kinship is released under the MIT license.
