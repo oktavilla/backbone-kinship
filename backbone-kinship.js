@@ -24,15 +24,28 @@
 		factory(root, root.Backbone, root._);
 	}
 } (this, function(exports, Backbone, _) {
+
+  // Temporary data per model
+  var settingData = {};
+  
   Backbone.RelationalModel = Backbone.Model.extend({
     relations: {},
-
+    
+    /**
+    * Overrides standard Backbone functionality
+    */
     get: function(key) {
       return this.relations[key] ? this[key] : Backbone.Model.prototype.get.call(this, key);
     },
 
+    /**
+    * Overrides standard Backbone functionality
+    */
     set: function(key, value, options) {
-      var attributes, isCloned;
+      var changeWasTriggered = false;
+      var attributes, isCloned, delayedEvents;
+      // Initializing setting
+      isSetting(this, true);
       // Handling the two function signatures, either key-value or attribute object
       if (_.isObject(key)) {
         attributes = key;
@@ -48,7 +61,7 @@
         Object.defineProperty(this, "attributes", {
           configurable: true,
           enumerable: true,
-          get: function() {
+          get: function () {
             return getAttributes(this);
           },
           set: function(value) {
@@ -58,8 +71,8 @@
       }
       // Checking if any relations are among the attributes
       _.each(this.relations, function(constructor, name) {
-        var entity;
         var setMethod = "set";
+        var entity;
         // Making sure that this relation is set up
         if (!this[name]) {
           // Setting up new relation
@@ -69,10 +82,6 @@
             this[name] = entity;
             // Setting up dispatcher for relational events, for example that "add" on a relation called "collection" would trigger the event "collection:add" on this model
             delegateEvents(this[name], this, name);
-          }
-          // Initial sets are always resets (if possible and unless required otherwise)
-          if ((!options || typeof options.reset === "undefined") && entity.reset) {
-            setMethod = "reset";
           }
         }
         // Checking if there is data for this relation
@@ -100,27 +109,65 @@
           }
         }
       }, this);
+      // Setting standard attributes the normal way
       if (key) {
+        // Listening for change events from the attributes
+        this.on("change", function () { changeWasTriggered = true; }, "relational");
         Backbone.Model.prototype.set.call(this, key, value, options);
+        this.off("change", null, "relational");
       }
+      // Triggering delayed events from the relations
+      delayedEvents = getDelayedEvents(this);
+      if (delayedEvents) {
+        for (var i = 0, ln = delayedEvents.length; i < ln; i++) {
+          this.trigger.apply(this, delayedEvents[i]);
+        }
+        // No change event from the standard attributes - let's trigger one ourselves
+        if (!changeWasTriggered) {
+          this.trigger("change", [this]);
+        }
+      }
+      // Cleaning up
+      clearSettingData(this);
       return this;
     }
   });
-
+  
   /**
-  * These events should also trigger a "change" event.
+  * Returns kinship data for a model
+  * @param model A Backbone-kinship model
+  * @param key The key where the data is stored
+  * @return Stored data
   */
-  var CHANGE_EVENTS = {
-    add: true,
-    remove: true,
-    change: true,
-    reset: true
-  };
+  function getSettingData(model, key) {
+    return settingData[model.cid] ? settingData[model.cid][key] : null;
+  }
+  
+  /**
+  * Stores kinship data for a model
+  * @param model A Backbone-kinship model
+  * @param key The key to store data at
+  * @param value The data to store
+  */
+  function setSettingData(model, key, value) {
+    if (!settingData[model.cid]) {
+      settingData[model.cid] = {};
+    }
+    settingData[model.cid][key] = value;
+  }
+  
+  /**
+  * Clears kinship data
+  * @param model A Backbone-kinship model
+  */
+  function clearSettingData(model) {
+    delete settingData[model.cid];
+  }
 
   /**
   * Returns all attributes for a model
   * Relational attributes will be JSONified
-  * @param model A Backbone-kinship Model
+  * @param model A Backbone-kinship model
   * @return Model attributes
   */
   function getAttributes(model) {
@@ -135,31 +182,79 @@
   }
   
   /**
-  * Sets attributes for a model
-  * @param model A Backbone-kinship Model
+  * Sets attributes to a model
+  * @param model A Backbone-kinship model
   * @param value The value to set
   */
   function setAttributes(model, value) {
     model._attributes = value;
   }
   
+  /**
+  * Adds a delayed event to a model
+  * @param model A Backbone-kinship model
+  * @param args Event arguments
+  */
+  function addDelayedEvent(model, args) {
+    var delayedEvents = getSettingData(model, "delayedEvents") || {};
+    delayedEvents[args[0]] = args; // Storing them this way to avoid duplicates
+    setSettingData(model, "delayedEvents", delayedEvents);
+  }
+  
+  /**
+  * Returns all delayed events for a model
+  * @param model A Backbone-kinship model
+  * @return An array of event arguments
+  */
+  function getDelayedEvents(model) {
+    return _.values(getSettingData(model, "delayedEvents") || {});
+  }
+  
+  /**
+  * Either returns or sets whether a model is setting data or not
+  * @param model A Backbone-kinshop model
+  * @param value If the model is setting or not (optional)
+  * @return True or false
+  */
+  function isSetting(model, value) {
+    if (typeof value !== "undefined") {
+      setSettingData(model, "isSetting", value);
+    }
+    return !!getSettingData(model, "isSetting");
+  }
+  
   /*
   * Delegates all events from one entity to another, on the format
   * eventName:fromName. A "change" event will also be triggered for "add", "remove",
   * "change" and "reset" events.
-  * @param from The entity that emits the event
-  * @param to The entity that should receive the event
-  * @param fromName Display name to use to show where this event originated
+  * @param relation The entity that emits the event
+  * @param model The entity that should receive the event
+  * @param relationName Display name to use to show where this event originated
   */
-  function delegateEvents(from, to, fromName) {
-    from.bind("all", function() {
+  function delegateEvents(relation, model, relationName) {
+    relation.bind("all", function () {
       var args = _.toArray(arguments); // Cloning
       var eventName = args[0];
-      args[0] = eventName + ":" + fromName;
-      to.trigger.apply(to, args);
-      if (CHANGE_EVENTS[eventName]) {
-        args[0] = "change";
-        to.trigger.apply(to, args);
+      var colonIndex = eventName.indexOf(":");
+      var eventType = colonIndex >= 0 ? eventName.substring(0, colonIndex) : eventName;
+      args[0] = eventName + ":" + relationName;
+      // Triggering events (change events are handled below)
+      if (eventType !== "change") {
+        model.trigger.apply(model, args);
+      }
+      // Triggering change events on the model
+      if (eventType === "change" || eventType === "update" || eventType === "reset") {
+        args[0] = "change:" + relationName;
+        args[1] = model; // Change events are triggered on model
+        if (isSetting(model)) {
+          // Delaying change events until _all_ model changes have been made
+          addDelayedEvent(model, args);
+        } else {
+          // We should be done - triggering right away
+          model.trigger.apply(model, args);
+          // Since we're not relying on the model to handle this we have to trigger our own change event
+          model.trigger("change", [model]);
+        }
       }
     });
   }
