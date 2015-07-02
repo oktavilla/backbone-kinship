@@ -5,6 +5,9 @@
   "main": "backbone-kinship.js",
   "description": "A simple model for 1-N and 1-1 relations",
   "homepage": "https://github.com/Oktavilla/backbone-kinship",
+  "scripts": {
+    "test": "export NODE_ENV=test; mocha test --recursive"
+  },
   "keywords": [
     "backbone",
     "relation",
@@ -21,5 +24,9 @@
   "dependencies": {
     "underscore": ">=1.5.0",
     "backbone": ">=1.1.2"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.4",
+    "sinon": "^1.14.1"
   }
 }
