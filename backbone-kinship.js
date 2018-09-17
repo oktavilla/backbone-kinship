@@ -84,6 +84,9 @@
           // Handling both key-value and attribute signatures
           if (_.isObject(attributes[name])) {
             this[name][setMethod](attributes[name], options);
+            if (options && options.resetModel) {
+              resetModel(this[name], attributes[name], options);
+            }
           } else {
             this[name][setMethod](attributes[name], attributes[name].value, options);
           }
@@ -104,7 +107,13 @@
         Backbone.Model.prototype.set.call(this, key, value, options);
       }
       return this;
-    }
+    },
+
+    reset(value, options) {
+      if (Backbone.Model.prototype.reset) {
+        Backbone.Model.prototype.reset.call(this, value, Object.assign({}, options, { resetModel: true }));
+      }
+    },
   });
 
   /**
@@ -133,7 +142,7 @@
     });
     return attributes;
   }
-  
+
   /**
   * Sets attributes for a model
   * @param model A Backbone-kinship Model
@@ -142,7 +151,7 @@
   function setAttributes(model, value) {
     model._attributes = value;
   }
-  
+
   /*
   * Delegates all events from one entity to another, on the format
   * eventName:fromName. A "change" event will also be triggered for "add", "remove",
@@ -162,5 +171,22 @@
         to.trigger.apply(to, args);
       }
     });
+  }
+
+  function resetModel(o, data, options) {
+    if (o instanceof Backbone.Model) {
+      o.resetModel(data, options);
+    } else if (o instanceof Backbone.Collection) {
+      o.forEach(function (model) {
+        const modelData = data.find(function(item) {
+          return item.id === model.id;
+        });
+        if (modelData) {
+          model.reset(modelData, options);
+        } else {
+          o.remove(model, options);
+        }
+      });
+    }
   }
 }));
