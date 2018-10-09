@@ -109,7 +109,7 @@
       return this;
     },
 
-    reset(value, options) {
+    reset: function(value, options) {
       if (Backbone.Model.prototype.reset) {
         Backbone.Model.prototype.reset.call(this, value, Object.assign({}, options, { resetModel: true }));
       }
